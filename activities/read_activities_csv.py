@@ -39,8 +39,8 @@ def read_activities_csv():
                 end_time=epoch_of_time_str(row[1], zoneinfo.gettz(row[4])),
                 activity_type=activitity_types.get(row[5]),
                 calories=data['calories'],
+                steps=data['steps'],
                 distance=data['distance'],
-                steps=data['steps']
                 ))
     return activities
 
@@ -53,6 +53,9 @@ def read_activities_csv_with_gfit_format():
             startTimeNanos=nano(activity["start_time"]),
             endTimeNanos=nano(activity["end_time"]),
             value=[dict(intVal=activity["activity_type"])],
+            calories=[dict(intVal=activity["calories"])],
+            steps=[dict(intVal=activity["steps"])],
+            distance=[dict(intVal=activity["distance"])]
         ))
     return gfit_activities
 

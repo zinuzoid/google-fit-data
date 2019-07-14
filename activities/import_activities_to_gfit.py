@@ -27,7 +27,7 @@ CLIENT_SECRET = secrets['client_secret']
 #REDIRECT_URI='https://developers.google.com/oauthplayground'
 REDIRECT_URI = secrets['redirect_uri']
 
-PROJECT_ID = secrets['project_id']
+PROJECT_ID = CLIENT_ID.split('-')[0]
 
 # See scope here: https://developers.google.com/fit/rest/v1/authorization
 SCOPE = 'https://www.googleapis.com/auth/fitness.activity.write'
