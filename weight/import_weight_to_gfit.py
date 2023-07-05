@@ -10,6 +10,7 @@ from apiclient.discovery import build
 
 from oauth2client.file import Storage
 from oauth2client.client import AccessTokenRefreshError
+from oauth2client.client import AccessTokenCredentials
 from oauth2client.client import OAuth2WebServerFlow
 from read_weight_csv import read_weights_csv_with_gfit_format
 from googleapiclient.errors import HttpError
@@ -29,7 +30,7 @@ REDIRECT_URI = secrets['redirect_uri']
 PROJECT_ID = secrets['project_id']
 
 # See scope here: https://developers.google.com/fit/rest/v1/authorization
-SCOPE = 'https://www.googleapis.com/auth/fitness.body.write'
+SCOPE = 'https://www.googleapis.com/auth/fitness.body.read https://www.googleapis.com/auth/fitness.body.write'
 
 # API Key
 # Steps:
@@ -40,18 +41,20 @@ API_KEY = secrets['fitness_api_key']
 def import_weight_to_gfit():
     # first step of auth
     # only approved IP is my Digital Ocean Server
-    flow = OAuth2WebServerFlow(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, scope=SCOPE, redirect_uri=REDIRECT_URI)
-    auth_uri = flow.step1_get_authorize_url()
-    print "Copy this url to web browser for authorization: "
-    print auth_uri
+    # flow = OAuth2WebServerFlow(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, scope=SCOPE, redirect_uri=REDIRECT_URI)
+    # auth_uri = flow.step1_get_authorize_url()
+    # print "Copy this url to web browser for authorization: "
+    # print auth_uri
 
     # hmm, had to manually pull this as part of a Google Security measure.
     # there must be a way to programatically get this, but this exercise doesn't need it ... yet...
-    token = raw_input("Copy the token from URL and input here: ")
-    cred = flow.step2_exchange(token)
+    # token = raw_input("Copy the token from URL and input here: ")
+    # cred = flow.step2_exchange(token)
+    credentials = AccessTokenCredentials(__ADD_KEY__, 'weight-csv-to-gfit/1.0')
     http = httplib2.Http()
-    http = cred.authorize(http)
-    fitness_service = build('fitness','v1', http=http, developerKey=API_KEY)
+    http = credentials.authorize(http)
+    # http = cred.authorize(http)
+    fitness_service = build('fitness','v1', http=http) # , developerKey=API_KEY)
 
     # init the fitness objects
     fitusr = fitness_service.users()
@@ -89,17 +92,19 @@ def import_weight_to_gfit():
     print data_source_id
     # Ensure datasource exists for the device.
     try:
-        fitness_service.users().dataSources().get(
+        dsi=fitness_service.users().dataSources().get(
             userId='me',
             dataSourceId=data_source_id).execute()
+        print dsi
     except HttpError, error:
+        print error
         if not 'DataSourceId not found' in str(error):
             raise error
         # Doesn't exist, so create it.
-        fitness_service.users().dataSources().create(
+        dsi=fitness_service.users().dataSources().create(
             userId='me',
             body=data_source).execute()
-
+        print dsi
     weights = read_weights_csv_with_gfit_format()
     print 'got weights...'
     min_log_ns = weights[0]["startTimeNanos"]

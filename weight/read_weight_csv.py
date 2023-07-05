@@ -5,7 +5,7 @@ import dateutil.parser
 from dateutil import zoneinfo
 
 DAWN_TIME = datetime.datetime(1970, 1, 1, tzinfo=dateutil.tz.tzutc())
-TIME_ZONE = zoneinfo.gettz("America/New_York")
+TIME_ZONE = zoneinfo.gettz("GMT")
 POUNDS_PER_KILOGRAM = 2.20462
 
 def nano(val):
@@ -40,9 +40,10 @@ def read_weights_csv_with_gfit_format():
             dataTypeName='com.google.weight',
             endTimeNanos=nano(weight["seconds_from_dawn"]),
             startTimeNanos=nano(weight["seconds_from_dawn"]),
-            value=[dict(fpVal=weight["weight"]/POUNDS_PER_KILOGRAM)],
+            value=[dict(fpVal=weight["weight"])],
         ))
     return gfit_weights
 
 if __name__=="__main__":
     gfit_weights = read_weights_csv_with_gfit_format()
+    print gfit_weights
